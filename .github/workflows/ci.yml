@@ -23,7 +23,21 @@ jobs:
         run: ruff check .
 
       - name: Test (no network / no real keys)
-        run: pytest -q
+        run: |
+          set +e
+          python -m pytest -q 2>&1 | tee pytest.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "## pytest 失败（exit ${status}）"
+              echo '```'
+              tail -120 pytest.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            message=$(tail -60 pytest.log | tr '\n' ' ' | sed 's/%/%25/g' | head -c 1200)
+            echo "::error title=pytest 失败（exit ${status}）::${message}"
+          fi
+          exit "$status"
 
       - name: Secret scan
         run: python scripts/check_secrets.py

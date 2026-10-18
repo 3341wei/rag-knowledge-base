@@ -309,6 +309,34 @@ data: {"code":"UPSTREAM_TIMEOUT","message":"模型服务超时，请稍后重试
 
 > 如果真实密钥曾经被提交或分享，请立即在服务商控制台吊销并重新生成；仅删除文件并不能消除历史记录中的泄漏。
 
+### 更换访问密钥
+
+访问密钥保存在项目根目录的 `.env` 中（`API_KEYS=` 一行，已被 git 忽略，不会上传）。查看与更换：
+
+```bash
+# 1. 查看当前密钥（仅在本机终端执行）
+grep '^API_KEYS=' .env
+
+# 2. 生成新密钥
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# 3. 编辑 .env，把 API_KEYS= 后面的值替换为新密钥
+# 4. 重建容器，让新配置生效
+docker compose up -d --force-recreate
+```
+
+然后在前端「设置」中填入新密钥，旧密钥立即失效。
+
+需要平滑轮换、不中断调用方时，可同时配置多把密钥：
+
+```
+API_KEYS=旧密钥,新密钥
+```
+
+待所有调用方切换完成后，再移除旧密钥并重建容器。
+
+> 注意：仅执行 `docker compose restart` 不会重新读取 `.env`，必须使用 `up -d --force-recreate`（或 `down` 后 `up -d`）。本地非 Docker 方式运行则重启 `python run.py` 即可。
+
 ## 已知限制
 
 - **单 worker**：会话记忆（MemorySaver）、BM25 缓存与限流计数都在进程内，水平扩展需要外部存储（Redis / 数据库）。因此 Docker 固定 `--workers 1`、`replicas: 1`
