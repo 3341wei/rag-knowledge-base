@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    image: rag-knowledge-base:latest
+    container_name: rag-knowledge-base
+    restart: unless-stopped
+
+    # 密钥从宿主机 .env 注入，镜像内不包含 .env
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      CHROMA_DIR: /app/chroma_db
+      HOST: 0.0.0.0
+      PORT: "8000"
+
+    ports:
+      # 默认只监听本机；局域网/公网部署改为 BIND_ADDR=0.0.0.0
+      - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-8000}:8000"
+
+    volumes:
+      # 文档目录只读；索引使用命名卷，避免宿主机权限问题
+      - ./data:/app/data:ro
+      - chroma_data:/app/chroma_db
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    # 单副本：MemorySaver、BM25 缓存与限流均为进程内状态
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 1g
+
+volumes:
+  chroma_data:

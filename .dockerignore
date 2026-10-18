@@ -1,0 +1,31 @@
+# 绝不打进镜像
+.env
+.env.*
+!.env.example
+
+# 版本控制与 CI
+.git
+.gitignore
+.dockerignore
+.github
+
+# 本地索引与运行时数据（容器使用 volume）
+chroma_db
+chroma_db-*
+logs
+*.log
+
+# Python 缓存与虚拟环境
+__pycache__
+*.py[cod]
+*.egg-info
+.venv
+venv
+env
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# 测试与本地备份
+tests
+*-backup

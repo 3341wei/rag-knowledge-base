@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企业级 RAG 智能知识库</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>📚 企业级 RAG 智能知识库</h1>
+    <div class="actions">
+      <div class="mode-switch" role="group" aria-label="问答模式">
+        <button class="btn mode-btn active" id="modeAgent" type="button">🤖 智能体</button>
+        <button class="btn mode-btn" id="modeRag" type="button">📚 RAG 问答</button>
+      </div>
+      <button class="btn btn-ghost" id="newSessionBtn" type="button" aria-label="新建会话">🆕 新会话</button>
+      <button class="btn btn-ghost" id="settingsBtn" type="button" aria-label="访问设置">⚙️ 设置</button>
+      <button class="btn btn-rebuild" id="rebuildBtn" type="button">🔄 重建索引</button>
+    </div>
+  </header>
+
+  <div class="statusbar" id="statusbar" role="status" aria-live="polite">正在检查服务状态…</div>
+
+  <main id="chat">
+    <div class="hint" id="hint">在下方输入问题，开始查询知识库 👇</div>
+  </main>
+
+  <footer>
+    <label class="sr-only" for="question">输入问题</label>
+    <input id="question" type="text" autocomplete="off"
+           placeholder="输入你的问题，例如：员工请假需要提前几天申请？">
+    <button class="btn btn-send" id="sendBtn" type="button">发送</button>
+    <button class="btn btn-stop hidden" id="stopBtn" type="button">停止</button>
+  </footer>
+
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+    <form method="dialog" class="dialog-body">
+      <h2 id="settingsTitle">访问设置</h2>
+      <p class="dialog-hint">
+        服务端启用鉴权时，需要在请求头中携带 <code>X-API-Key</code>。
+        密钥仅保存在当前标签页（sessionStorage），关闭标签页即清除。
+      </p>
+      <label for="apiKeyInput">访问密钥</label>
+      <input id="apiKeyInput" type="password" autocomplete="off" placeholder="留空表示服务端未启用鉴权">
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" id="clearKeyBtn" type="button">清除</button>
+        <button class="btn btn-send" id="saveKeyBtn" type="button">保存</button>
+        <button class="btn btn-ghost" id="closeSettingsBtn" type="button">关闭</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

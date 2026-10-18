@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test (no network / no real keys)
+        run: pytest -q
+
+      - name: Secret scan
+        run: python scripts/check_secrets.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t rag-knowledge-base:ci .
+
+      - name: Verify image does not contain .env
+        run: |
+          if docker run --rm --entrypoint sh rag-knowledge-base:ci -c 'test -e /app/.env'; then
+            echo "镜像中不应包含 .env" && exit 1
+          fi
+          echo "OK: 镜像中无 .env"

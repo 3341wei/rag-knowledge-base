@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["chroma_db", ".venv", "venv", "__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# UP009：项目统一保留 UTF-8 编码声明，与现有文件风格一致
+ignore = ["E501", "UP009"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning:langchain_community.*",
+]
